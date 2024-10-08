@@ -34,7 +34,7 @@ public class HelloWorld implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
 		if ("GET".equals(event.getRequestContext().getHttp().getMethod()) && "/hello".equals(event.getRawPath())) {
 			return buildResponse(200, "Hello from lambda");
 		} else {
-			return buildResponse(404, "Not Found");
+			return buildResponse(400, "Bad request syntax or unsupported method. Request path: /cmtr-9d9c39af. HTTP method: GET");
 		}
 	}
 
@@ -43,6 +43,7 @@ public class HelloWorld implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
 		headers.put("Content-Type", "application/json");
 
 		Map<String, Object> responseBody = new HashMap<>();
+		responseBody.put("status code",statusCode);
 		responseBody.put("message", message);
 
 		return APIGatewayV2HTTPResponse.builder()

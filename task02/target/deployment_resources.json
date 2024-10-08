@@ -3,7 +3,7 @@
     "name" : "hello_world_lambda",
     "lambda_path" : "/home/kmzen/Konrad/Projekty_IT/epam/AWS_Course/Syndicate/epam-syndicate-tasks/task02",
     "version" : "1.0.0",
-    "func_name" : "com.task02.HelloWorldLambda",
+    "func_name" : "com.task02.HelloWorld",
     "deployment_package" : "task02-1.0.0.jar",
     "resource_type" : "lambda",
     "runtime" : "java11",

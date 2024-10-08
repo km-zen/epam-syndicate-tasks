@@ -32,7 +32,7 @@ public class HelloWorld implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
 	@Override
 	public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent event, Context context) {
 		if ("GET".equals(event.getRequestContext().getHttp().getMethod()) && "/hello".equals(event.getRawPath())) {
-			return buildResponse(200, "Hello from lambda");
+			return buildResponse(200, "Hello from Lambda");
 		} else {
 			return buildResponse(400, "Bad request syntax or unsupported method. Request path: /cmtr-9d9c39af. HTTP method: GET");
 		}

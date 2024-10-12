@@ -16,7 +16,6 @@ import java.util.Map;
     lambdaName = "sqs_handler",
 	roleName = "sqs_handler-role",
 	isPublishVersion = false,
-	aliasName = "${lambdas_alias_name}",
 	logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
 )
 @SqsTriggerEventSource(
@@ -26,7 +25,6 @@ import java.util.Map;
 @DependsOn(
 		name = "async_queue",
 		resourceType = ResourceType.SQS_QUEUE
-
 )
 public class SqsHandler implements RequestHandler<SQSEvent, Void> {
 

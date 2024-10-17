@@ -46,29 +46,27 @@ public class ApiHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
 	private final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
 			.withRegion("us-east-1")
 			.build();
+	private final DynamoDB dynamoDB = new DynamoDB(client);
 
 	@Override
 	public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent event, Context context) {
 		if ("POST".equals(event.getRequestContext().getHttp().getMethod()) && "/events".equals(event.getRawPath())) {
-			Map<String, String> content = gson.fromJson(event.getBody(), Map.class);
+			EventRequest eventRequest = gson.fromJson(event.getBody(), EventRequest.class);
 			String id = UUID.randomUUID().toString();
 			String createdAt = java.time.Instant.now().toString();
-			int principalId = Integer.parseInt(content.get("principalId"));
+
 			Item item = new Item().withPrimaryKey("id", id)
 					.withString("createdAt", createdAt)
-					.withInt("principalId", principalId)
-					.withMap("body",content);
-			DynamoDB dynamoDB = new DynamoDB(client);
-			Table table = dynamoDB.getTable(System.getenv("target_table"));
-			table.putItem(item);
+					.withInt("principalId", eventRequest.getPrincipalId())
+					.withMap("body", eventRequest.getContent());
 
-			Map<String, Object> eventDetails = new HashMap<>();
-			eventDetails.put("id", id);
-			eventDetails.put("principalId", principalId);
-			eventDetails.put("createdAt", createdAt);
-			eventDetails.put("body", content);
-
-			return buildResponse(201, gson.toJson(Map.of("event", eventDetails)));
+			Table table = dynamoDB.getTable("Events");
+			try {
+				table.putItem(item);
+				return buildResponse(201, gson.toJson(Map.of("event", item.toJSON())));
+			} catch (Exception e) {
+				return buildResponse(500, "Internal Server Error: " + e.getMessage());
+			}
 		} else {
 			return buildResponse(400, "Bad request syntax or unsupported method");
 		}

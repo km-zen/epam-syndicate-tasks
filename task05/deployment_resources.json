@@ -14,7 +14,11 @@
             "dynamodb:DeleteItem",
             "ssm:PutParameter",
             "ssm:GetParameter",
-            "kms:Decrypt"
+            "kms:Decrypt",
+            "stream:GetRecords",
+            "stream:GetShardIterator",
+            "stream:DescribeStream",
+            "stream:ListStreams"
           ],
           "Effect": "Allow",
           "Resource": "*"

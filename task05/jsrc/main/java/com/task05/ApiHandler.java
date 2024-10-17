@@ -4,31 +4,19 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
-import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
-import com.amazonaws.services.dynamodbv2.model.PutItemResult;
-import com.amazonaws.services.dynamodbv2.xspec.S;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.*;
-import com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.syndicate.deployment.annotations.environment.EnvironmentVariable;
 import com.syndicate.deployment.annotations.environment.EnvironmentVariables;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
-import com.syndicate.deployment.annotations.lambda.LambdaUrlConfig;
-import com.syndicate.deployment.model.ResourceType;
 import com.syndicate.deployment.model.RetentionSetting;
-import com.syndicate.deployment.annotations.resources.DependsOn;
-import com.syndicate.deployment.annotations.events.DynamoDbTriggerEventSource;
-import com.syndicate.deployment.model.lambda.url.AuthType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,15 +27,10 @@ import java.util.UUID;
 		aliasName = "${lambdas_alias_name}",
 		logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
 )
-@DynamoDbTriggerEventSource(targetTable = "Events", batchSize = 1)
-@DependsOn(name = "Events", resourceType = ResourceType.DYNAMODB_TABLE)
 @EnvironmentVariables(value = {
 		@EnvironmentVariable(key = "region", value = "${region}"),
 		@EnvironmentVariable(key = "target_table", value = "${target_table}")
 })
-@LambdaUrlConfig(
-		authType = AuthType.NONE
-)
 public class ApiHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
 	private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 	private static final Log log = LogFactory.getLog(ApiHandler.class);
@@ -71,7 +54,6 @@ public class ApiHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
 		log.info(principalId);
 		log.info(eventRequest.getContent());
 		Item item = new Item().withPrimaryKey("id", id)
-				.with("Category","category")
 				.withInt("principalId", principalId)
 				.with("createdAt", createdAt)
 				.withMap("body", body);

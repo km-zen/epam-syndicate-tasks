@@ -76,10 +76,14 @@ public class ApiHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
 		Map<String, String> headers = new HashMap<>();
 		headers.put("Content-Type", "application/json");
 
+		Map<String, Object> responseBody = new HashMap<>();
+		responseBody.put("statusCode",statusCode);
+		responseBody.put("message", message);
+
 		return APIGatewayV2HTTPResponse.builder()
 				.withStatusCode(statusCode)
 				.withHeaders(headers)
-				.withBody(message)
+				.withBody(gson.toJson(responseBody))
 				.build();
 	}
 }

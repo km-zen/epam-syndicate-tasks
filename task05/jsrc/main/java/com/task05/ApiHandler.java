@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
 import com.amazonaws.services.dynamodbv2.model.PutItemResult;
@@ -51,7 +52,7 @@ public class ApiHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
 	@Override
 	public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent event, Context context) {
 		if ("POST".equals(event.getRequestContext().getHttp().getMethod()) && "/events".equals(event.getRawPath())) {
-			EventRequest eventRequest = gson.fromJson(event.getBody(), EventRequest.class);
+			EventRequest eventRequest = new Gson().fromJson(event.getBody(), EventRequest.class);
 			String id = UUID.randomUUID().toString();
 			String createdAt = java.time.Instant.now().toString();
 
@@ -59,11 +60,19 @@ public class ApiHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
 					.withString("createdAt", createdAt)
 					.withInt("principalId", eventRequest.getPrincipalId())
 					.withMap("body", eventRequest.getContent());
-
 			Table table = dynamoDB.getTable("Events");
 			try {
-				table.putItem(item);
-				return buildResponse(201, gson.toJson(Map.of("event", item.toJSON())));
+				PutItemOutcome outcome = table.putItem(item);
+				if (outcome.getPutItemResult() != null) {
+					Map<String, Object> response = new HashMap<>();
+					response.put("id", id);
+					response.put("principalId", eventRequest.getPrincipalId());
+					response.put("createdAt", createdAt);
+					response.put("body", eventRequest.getContent());
+					return buildResponse(201, new Gson().toJson(response));
+				} else {
+					return buildResponse(500, "Failed to put item into the table");
+				}
 			} catch (Exception e) {
 				return buildResponse(500, "Internal Server Error: " + e.getMessage());
 			}
@@ -72,18 +81,14 @@ public class ApiHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
 		}
 	}
 
-	private APIGatewayV2HTTPResponse buildResponse(int statusCode, String message) {
+	private APIGatewayV2HTTPResponse buildResponse(int statusCode, String responseJSON) {
 		Map<String, String> headers = new HashMap<>();
 		headers.put("Content-Type", "application/json");
-
-		Map<String, Object> responseBody = new HashMap<>();
-		responseBody.put("statusCode",statusCode);
-		responseBody.put("message", message);
 
 		return APIGatewayV2HTTPResponse.builder()
 				.withStatusCode(statusCode)
 				.withHeaders(headers)
-				.withBody(gson.toJson(responseBody))
+				.withBody(responseJSON)
 				.build();
 	}
 }

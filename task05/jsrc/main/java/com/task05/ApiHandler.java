@@ -59,12 +59,12 @@ public class ApiHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
         log.info(principalId);
         log.info(eventRequest.getContent());
         Item item = new Item().withPrimaryKey("id", id)
-                .withNumber("principalId", principalId)
+                .withInt("principalId", principalId)
                 .with("createdAt", createdAt)
                 .withMap("body", body);
         Table table = dynamoDB.getTable(System.getenv("target_table"));
         table.putItem(item);
-        EventResponse event = new EventResponse(id, principalId, createdAt, body);
+        EventResponse event = new EventResponse(id, String.valueOf(principalId), createdAt, body);
 
         Map<String, Object> eventMap = gson.fromJson(gson.toJson(event), Map.class);
         log.info(eventMap);

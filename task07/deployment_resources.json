@@ -25,6 +25,21 @@
     "resource_type": "iam_policy",
     "tags": {}
   },
+  "UuidGeneratorPolicy": {
+    "resource_type": "iam_policy",
+    "policy_content": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Action": [
+            "s3:PutObject"
+          ],
+          "Resource": "*",
+          "Effect": "Allow"
+        }
+      ]
+    }
+  },
   "uuid_generator-role": {
     "predefined_policies": [],
     "principal_service": "lambda",

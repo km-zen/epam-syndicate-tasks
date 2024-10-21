@@ -44,6 +44,7 @@
     "predefined_policies": [],
     "principal_service": "lambda",
     "custom_policies": [
+      "UuidGeneratorPolicy",
       "lambda-basic-execution"
     ],
     "resource_type": "iam_role",

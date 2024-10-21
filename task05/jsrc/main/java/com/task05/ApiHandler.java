@@ -14,7 +14,9 @@ import com.google.gson.GsonBuilder;
 import com.syndicate.deployment.annotations.environment.EnvironmentVariable;
 import com.syndicate.deployment.annotations.environment.EnvironmentVariables;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
+import com.syndicate.deployment.annotations.lambda.LambdaUrlConfig;
 import com.syndicate.deployment.model.RetentionSetting;
+import com.syndicate.deployment.model.lambda.url.AuthType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -33,6 +35,9 @@ import java.util.UUID;
 		@EnvironmentVariable(key = "region", value = "${region}"),
 		@EnvironmentVariable(key = "target_table", value = "${target_table}")
 })
+@LambdaUrlConfig(
+		authType = AuthType.NONE
+)
 public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 	private static final Log log = LogFactory.getLog(ApiHandler.class);
 	private final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()

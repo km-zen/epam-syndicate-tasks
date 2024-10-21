@@ -4,11 +4,11 @@ import java.util.Map;
 
 public class EventResponse {
     private final String id;
-    private final int principalId;
+    private final Number principalId;
     private final String createdAt;
     private final Map<String, String> body;
 
-    public EventResponse(String id, int principalId, String createdAt, Map<String, String> body) {
+    public EventResponse(String id, Number principalId, String createdAt, Map<String, String> body) {
         this.id = id;
         this.principalId = principalId;
         this.createdAt = createdAt;
@@ -19,7 +19,7 @@ public class EventResponse {
         return id;
     }
 
-    public int getPrincipalId() {
+    public Number getPrincipalId() {
         return principalId;
     }
 

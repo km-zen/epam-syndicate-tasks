@@ -59,7 +59,7 @@ public class ApiHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
         log.info(principalId);
         log.info(eventRequest.getContent());
         Item item = new Item().withPrimaryKey("id", id)
-                .withInt("principalId", principalId)
+                .withNumber("principalId", principalId)
                 .with("createdAt", createdAt)
                 .withMap("body", body);
         Table table = dynamoDB.getTable(System.getenv("target_table"));

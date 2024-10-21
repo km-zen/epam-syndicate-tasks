@@ -59,7 +59,7 @@ public class AuditProducer implements RequestHandler<DynamodbEvent, Void> {
 				Map<String, Object> newValue = new HashMap<>();
 				newValue.put("key", key);
 				newValue.put("value", value);
-				Item item = new Item().withPrimaryKey("id", id)
+				Item item = new Item().withPrimaryKey("key", id)
 						.with("itemKey", key)
 						.with("modificationTime", modificationTime)
 						.withMap("newValue", newValue);
@@ -86,7 +86,7 @@ public class AuditProducer implements RequestHandler<DynamodbEvent, Void> {
 
 						// Tworzymy element do zapisu w tabeli auditowej
 						Item item = new Item()
-								.withPrimaryKey("id", id)
+								.withPrimaryKey("key", id)
 								.with("itemKey", key)
 								.with("modificationTime", modificationTime)
 								.with("updatedAttribute", "value")

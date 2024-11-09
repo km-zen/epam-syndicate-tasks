@@ -44,6 +44,7 @@
             <scope>system</scope>
             <systemPath>${basedir}/lib/java-client-meteo-sdk-1.0-SNAPSHOT.jar</systemPath>
         </dependency>
+
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -93,6 +94,10 @@
                                 <exclude>META-INF/*.SF</exclude>
                                 <exclude>META-INF/*.DSA</exclude>
                                 <exclude>META-INF/*.RSA</exclude>
+                                <exclude>META-INF/MANIFEST.MF*</exclude>
+                                <exclude>META-INF/versions/9/module-info.class</exclude>
+                                <exclude>META-INF/LICENSE*</exclude>
+                                <exclude>META-INF/NOTICE*</exclude>
                             </excludes>
                         </filter>
                     </filters>

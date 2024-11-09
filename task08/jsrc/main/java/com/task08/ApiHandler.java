@@ -24,6 +24,7 @@ import java.util.Map;
     lambdaName = "api_handler",
 		layers = {"sdk_layer"},
 	roleName = "api_handler-role",
+		runtime = DeploymentRuntime.JAVA11,
 		architecture = Architecture.ARM64,
 	isPublishVersion = true,
 	aliasName = "${lambdas_alias_name}",

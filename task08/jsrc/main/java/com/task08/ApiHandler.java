@@ -48,17 +48,17 @@ public class ApiHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
 			WeatherApiClient weatherApiClient = new WeatherApiClient();
 			double latitude = 52.52;
 			double longitude = 13.41;
-            Map<String, Object> weatherData = null;
+            Map<String, Object> weatherData;
             try {
                 weatherData = weatherApiClient.getWeatherData(latitude,longitude);
-				return buildResponse(200, weatherData);
+
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
 
-
+			return buildResponse(200, weatherData);
 		} else {
 			return buildResponse(400, new HashMap<>());
 		}
@@ -66,17 +66,15 @@ public class ApiHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
 
 	}
 
-	private APIGatewayV2HTTPResponse buildResponse(int statusCode, Map<String, Object> event) {
+	private APIGatewayV2HTTPResponse buildResponse(int statusCode, Map<String, Object> response) {
 		Map<String, String> headers = new HashMap<>();
 		headers.put("Content-Type", "application/json");
 
-		Map<String, Object> responseBody = new HashMap<>();
-		responseBody.put("response", event);
 
 		return APIGatewayV2HTTPResponse.builder()
 				.withStatusCode(statusCode)
 				.withHeaders(headers)
-				.withBody(gson.toJson(responseBody))
+				.withBody(gson.toJson(response))
 				.build();
 	}
 

@@ -7,7 +7,7 @@
     "deployment_package" : "task08-1.0.0.jar",
     "resource_type" : "lambda",
     "runtime" : "java11",
-    "architectures" : [ "x86_64" ],
+    "architectures" : [ "arm64" ],
     "iam_role_name" : "api_handler-role",
     "memory" : 1024,
     "timeout" : 300,
@@ -21,13 +21,18 @@
     "alias" : "${lambdas_alias_name}",
     "layers" : [ "sdk_layer" ],
     "logs_expiration" : "${logs_expiration}",
-    "snap_start" : "None"
+    "snap_start" : "None",
+    "url_config" : {
+      "auth_type" : "NONE",
+      "invoke_mode" : "BUFFERED"
+    }
   },
   "sdk_layer" : {
     "name" : "sdk_layer",
     "runtimes" : [ "java11" ],
     "resource_type" : "lambda_layer",
     "deployment_package" : "sdk_layer-assembly.zip",
-    "libraries" : [ "lib/my-custom-sdk-1.0.0.jar" ]
+    "libraries" : [ "lib/java-client-meteo-sdk-1.0-SNAPSHOT.jar" ],
+    "architectures" : [ "arm64" ]
   }
 }

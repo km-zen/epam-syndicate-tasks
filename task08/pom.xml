@@ -38,22 +38,17 @@
             <version>${syndicate.java.plugin.version}</version>
         </dependency>
         <dependency>
-            <groupId>external</groupId>
-            <artifactId>lambda-layer</artifactId>
-            <version>1.0.0</version>
+            <groupId>com.kmzen</groupId>
+            <artifactId>java-client-meteo-sdk</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>${basedir}/lib/my-custom-sdk-1.0.0.jar</systemPath>
+            <systemPath>${basedir}/lib/java-client-meteo-sdk-1.0-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.kmzen.</groupId>-->
-<!--            <artifactId>my-custom-sdk</artifactId>-->
-<!--            <version>1.0.0</version>-->
-<!--        </dependency>-->
     </dependencies>
 
     <build>

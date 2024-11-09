@@ -5,7 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import com.google.gson.Gson;
-import com.kmzen.meteocustomsdk.WeatherFetcher;
+import com.kmzen.WeatherApiClient;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
 import com.syndicate.deployment.annotations.lambda.LambdaLayer;
 import com.syndicate.deployment.annotations.lambda.LambdaUrlConfig;
@@ -15,22 +15,23 @@ import com.syndicate.deployment.model.DeploymentRuntime;
 import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.model.lambda.url.AuthType;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
+
 
 @LambdaHandler(
     lambdaName = "api_handler",
 		layers = {"sdk_layer"},
 	roleName = "api_handler-role",
+		architecture = Architecture.ARM64,
 	isPublishVersion = true,
 	aliasName = "${lambdas_alias_name}",
 	logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
 )
 @LambdaLayer(
 		layerName = "sdk_layer",
-		libraries = {"lib/my-custom-sdk-1.0.0.jar"},
-		runtime = DeploymentRuntime.JAVA17,
+		libraries = {"lib/java-client-meteo-sdk-1.0-SNAPSHOT.jar"},
 		architectures = {Architecture.ARM64},
 		artifactExtension = ArtifactExtension.ZIP
 )
@@ -41,10 +42,21 @@ public class ApiHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
 
 	private final Gson gson = new Gson();
 	public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent event, Context context) {
-		if ("GET".equals(event.getRequestContext().getHttp().getMethod()) && "/hello".equals(event.getRawPath())) {
-			WeatherFetcher fetcher = new WeatherFetcher();
-			Map<String, Object> weatherData = fetcher.fetchWeather();
-			return buildResponse(200, weatherData);
+		if ("GET".equals(event.getRequestContext().getHttp().getMethod()) && "/weather".equals(event.getRawPath())) {
+
+			WeatherApiClient weatherApiClient = new WeatherApiClient();
+			double latitude = 52.52;
+			double longitude = 13.41;
+            Map<String, Object> weatherData = null;
+            try {
+                weatherData = weatherApiClient.getWeatherData(latitude,longitude);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            return buildResponse(200, weatherData);
 		} else {
 			return buildResponse(400, new HashMap<>());
 		}
@@ -65,4 +77,5 @@ public class ApiHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGate
 				.withBody(gson.toJson(responseBody))
 				.build();
 	}
+
 }

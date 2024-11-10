@@ -20,6 +20,7 @@
       "region" : "${region}"
     },
     "tags" : { },
+    "tracing_mode" : "Active",
     "publish_version" : true,
     "alias" : "${lambdas_alias_name}",
     "logs_expiration" : "${logs_expiration}",

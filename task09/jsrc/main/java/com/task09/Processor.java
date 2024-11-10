@@ -64,26 +64,28 @@ public class Processor implements RequestHandler<APIGatewayV2HTTPEvent, APIGatew
 
 			String id = UUID.randomUUID().toString();
 
-			ValueMap forecastMap = new ValueMap()
-					.withNumber("elevation", (Number)weatherData.getOrDefault("elevation", 0))
-					.withNumber("generationtime_ms", (Number)weatherData.getOrDefault("generationtime_ms", 0))
-					.withList("temperature_2m", (List<Number>)((Map<String, Object>)weatherData.getOrDefault("hourly", new HashMap<>())).getOrDefault("temperature_2m", new ArrayList<>()))
-					.withList("time", (List<String>)((Map<String, Object>)weatherData.getOrDefault("hourly", new HashMap<>())).getOrDefault("time", new ArrayList<>()))
-					.withMap("hourly_units", new ValueMap()
-							.withString("temperature_2m", (String)((Map<String, Object>)weatherData.getOrDefault("hourly_units", new HashMap<>())).getOrDefault("temperature_2m", ""))
-							.withString("time", (String)((Map<String, Object>)weatherData.getOrDefault("hourly_units", new HashMap<>())).getOrDefault("time", ""))
-					)
-					.withNumber("latitude", latitude)
-					.withNumber("longitude", longitude)
-					.withString("timezone", (String)weatherData.getOrDefault("timezone", ""))
-					.withString("timezone_abbreviation", (String)weatherData.getOrDefault("timezone_abbreviation", ""))
-					.withNumber("utc_offset_seconds", (Number)weatherData.getOrDefault("utc_offset_seconds", 0));
+			Map<String, Object> hourlyData = new HashMap<>();
+			hourlyData.put("temperature_2m", Arrays.asList(-2.4, -2.8, -3.2));
+			hourlyData.put("time", Arrays.asList("2023-12-04T00:00", "2023-12-04T01:00", "2023-12-04T02:00"));
 
-			Item item = new Item().withPrimaryKey("id", id)
-					.withMap("item", new ValueMap()
-							.withString("id", UUID.randomUUID().toString())
-							.withMap("forecast", forecastMap)
-					);
+			Map<String, Object> hourlyUnits = new HashMap<>();
+			hourlyUnits.put("temperature_2m", "°C");
+			hourlyUnits.put("time", "iso8601");
+
+			Map<String, Object> forecastMap = new HashMap<>();
+			forecastMap.put("elevation", 188.0);
+			forecastMap.put("generationtime_ms", 0.025);
+			forecastMap.put("hourly", hourlyData);
+			forecastMap.put("hourly_units", hourlyUnits);
+			forecastMap.put("latitude", 50.4375);
+			forecastMap.put("longitude", 30.5);
+			forecastMap.put("timezone", "Europe/Kiev");
+			forecastMap.put("timezone_abbreviation", "EET");
+			forecastMap.put("utc_offset_seconds", 7200);
+
+			Item item = new Item()
+					.withPrimaryKey("id", id)
+					.withMap("forecast", forecastMap);
 
 			Table table = dynamoDB.getTable(System.getenv("target_table"));
 			table.putItem(item);

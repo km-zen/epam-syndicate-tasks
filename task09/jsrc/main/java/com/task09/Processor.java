@@ -77,12 +77,10 @@ public class Processor implements RequestHandler<APIGatewayV2HTTPEvent, APIGatew
 			forecastMap.put("timezone", weatherData.get("timezone"));
 			forecastMap.put("timezone_abbreviation", weatherData.get("timezone_abbreviation"));
 			forecastMap.put("utc_offset_seconds", weatherData.get("utc_offset_seconds"));
-
+			Object forecastMapObj = forecastMap;
 			Item item = new Item()
-					.withMap("item", new HashMap<>() {{
-						put("id", id);
-						put("forecast", forecastMap);
-					}});
+					.withPrimaryKey("id", id)
+					.with("forecast", forecastMapObj);
 
 			Table table = dynamoDB.getTable(System.getenv("target_table"));
 			table.putItem(item);

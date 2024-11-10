@@ -82,7 +82,7 @@ public class Processor implements RequestHandler<APIGatewayV2HTTPEvent, APIGatew
 					.withPrimaryKey("id", id)
 					.with("forecast", forecastMapObj);
 
-			Table table = dynamoDB.getTable(System.getenv("target_table"));
+			Table table = dynamoDB.getTable(System.getenv("cmtr-9d9c39af-Weather-test"));
 			table.putItem(item);
 			return buildResponse(200, weatherData);
 		} else {

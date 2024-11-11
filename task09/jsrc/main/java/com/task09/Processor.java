@@ -7,6 +7,7 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
@@ -18,6 +19,8 @@ import com.syndicate.deployment.annotations.lambda.LambdaUrlConfig;
 import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.model.TracingMode;
 import com.syndicate.deployment.model.lambda.url.AuthType;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -44,11 +47,11 @@ public class Processor implements RequestHandler<APIGatewayV2HTTPEvent, APIGatew
 	private final DynamoDB dynamoDB = new DynamoDB(client);
 
 	private final Gson gson = new Gson();
-
+	private static final Log log = LogFactory.getLog(Processor.class);
 	public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent event, Context context) {
-
+		log.info("In handleRequest method, before GET /");
 		if ("GET".equals(event.getRequestContext().getHttp().getMethod()) && "/".equals(event.getRawPath())) {
-
+			log.info("after calling GET /");
 			OpenMeteoApiClient weatherApiClient = new OpenMeteoApiClient();
 			double latitude = 52.52;
 			double longitude = 13.41;
@@ -86,6 +89,7 @@ public class Processor implements RequestHandler<APIGatewayV2HTTPEvent, APIGatew
 			table.putItem(item);
 			return buildResponse(200, weatherData);
 		} else {
+			log.info("Error, wrong endpoint");
 			return buildResponse(400, new HashMap<>());
 		}
 	}

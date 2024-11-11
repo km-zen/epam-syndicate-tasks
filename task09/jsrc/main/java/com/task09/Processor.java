@@ -68,13 +68,20 @@ public class Processor implements RequestHandler<APIGatewayV2HTTPEvent, APIGatew
 			String id = UUID.randomUUID().toString();
 
 			Map<String, Object> hourlyData = (Map<String, Object>) weatherData.get("hourly");
+			Map<String, Object> limitedHourlyData = new HashMap<>();
+			limitedHourlyData.put("time", hourlyData.get("time"));
+			limitedHourlyData.put("temperature_2m", hourlyData.get("temperature_2m"));
+
 			Map<String, Object> hourlyUnits = (Map<String, Object>) weatherData.get("hourly_units");
+			Map<String, Object> limitedHourlyUnits = new HashMap<>();
+			limitedHourlyUnits.put("time", hourlyUnits.get("time"));
+			limitedHourlyUnits.put("temperature_2m", hourlyUnits.get("temperature_2m"));
 
 			Map<String, Object> forecastMap = new HashMap<>();
 			forecastMap.put("elevation", weatherData.get("elevation"));
 			forecastMap.put("generationtime_ms", weatherData.get("generationtime_ms"));
-			forecastMap.put("hourly", hourlyData);
-			forecastMap.put("hourly_units", hourlyUnits);
+			forecastMap.put("hourly", limitedHourlyData);
+			forecastMap.put("hourly_units", limitedHourlyUnits);
 			forecastMap.put("latitude", weatherData.get("latitude"));
 			forecastMap.put("longitude", weatherData.get("longitude"));
 			forecastMap.put("timezone", weatherData.get("timezone"));

@@ -47,7 +47,7 @@ public class Processor implements RequestHandler<APIGatewayV2HTTPEvent, APIGatew
 
 	public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent event, Context context) {
 
-		if ("GET".equals(event.getRequestContext().getHttp().getMethod()) && "/weather".equals(event.getRawPath())) {
+		if ("GET".equals(event.getRequestContext().getHttp().getMethod()) && "/".equals(event.getRawPath())) {
 
 			OpenMeteoApiClient weatherApiClient = new OpenMeteoApiClient();
 			double latitude = 52.52;

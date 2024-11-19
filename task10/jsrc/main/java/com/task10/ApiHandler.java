@@ -38,7 +38,9 @@ import static com.syndicate.deployment.model.environment.ValueTransformer.USER_P
 @EnvironmentVariables(value = {
 		@EnvironmentVariable(key = "REGION", value = "${region}"),
 		@EnvironmentVariable(key = "COGNITO_ID", value = "${booking_userpool}", valueTransformer = USER_POOL_NAME_TO_USER_POOL_ID),
-		@EnvironmentVariable(key = "CLIENT_ID", value = "${booking_userpool}", valueTransformer = USER_POOL_NAME_TO_CLIENT_ID)
+		@EnvironmentVariable(key = "CLIENT_ID", value = "${booking_userpool}", valueTransformer = USER_POOL_NAME_TO_CLIENT_ID),
+		@EnvironmentVariable(key = "tables_table", value = "${Tables}"),
+		@EnvironmentVariable(key = "reservations_table", value = "${Reservations}")
 })
 public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
@@ -48,7 +50,7 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 	private final RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> routeNotImplementedHandler;
 	private static final Log log = LogFactory.getLog(ApiHandler.class);
 	private final AmazonDynamoDB dynamoDbClient = AmazonDynamoDBClientBuilder.standard()
-			.withRegion(System.getenv("region"))
+			.withRegion(System.getenv("REGION"))
 			.build();
 
 

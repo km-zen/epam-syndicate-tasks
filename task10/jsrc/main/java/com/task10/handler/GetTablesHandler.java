@@ -10,14 +10,17 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.*;
 
-public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayV2HTTPResponse> {
 
+    private final Gson gson = new Gson();
     private final AmazonDynamoDB dynamoDbClient;
 
     public GetTablesHandler(AmazonDynamoDB dynamoDbClient) {
@@ -25,7 +28,7 @@ public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEv
     }
 
     @Override
-    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+    public APIGatewayV2HTTPResponse handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
         try {
 
 
@@ -49,18 +52,19 @@ public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEv
                 tables.add(tableData);
             }
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            String jsonResponseBody = objectMapper.writeValueAsString(Collections.singletonMap("tables", tables));
 
-            return new APIGatewayProxyResponseEvent()
-                    .withStatusCode(200)
-                    .withHeaders(Collections.singletonMap("Content-Type", "application/json"))
-                    .withBody(jsonResponseBody);
+            return buildResponse(200, Collections.singletonMap("tables", tables));
         } catch (Exception e) {
-            return new APIGatewayProxyResponseEvent()
-                    .withStatusCode(400)
-                    .withBody(new JSONObject().put("error", "Failed to process request: " + e.getMessage()).toString());
+            return buildResponse(400, Collections.singletonMap("error", "Failed to process request: " + e.getMessage()));
         }
+    }
+
+    private APIGatewayV2HTTPResponse buildResponse(int statusCode, Map<String, Object> response) {
+        return APIGatewayV2HTTPResponse.builder()
+                .withStatusCode(statusCode)
+                .withHeaders(Collections.singletonMap("Content-Type", "application/json"))
+                .withBody(gson.toJson(response))
+                .build();
     }
 
 }

@@ -2,9 +2,9 @@ package com.task10.handler;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.*;
+import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
+import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
@@ -31,18 +31,36 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
 
         try {
-
-
             ObjectMapper mapper = new ObjectMapper();
             log.info("Post reservations request received: " + requestEvent.getBody());
             ReservationData reservationData = mapper.readValue(requestEvent.getBody(), ReservationData.class);
 
-            String reservationId = UUID.randomUUID().toString();
             DynamoDB dynamoDB = new DynamoDB(dynamoDbClient);
-            Table table = dynamoDB.getTable(System.getenv("reservations_table"));
+            Table table = dynamoDB.getTable(System.getenv("tables_table"));
+
+            // Sprawdzamy czy stół istnieje
+            Item tableItem = table.getItem("id", reservationData.getTableNumber());
+            if (tableItem == null) {
+                throw new Exception("Table does not exist");
+            }
+
+            // Sprawdzamy kolidujące rezerwacje
+            Table reservationsTable = dynamoDB.getTable(System.getenv("reservations_table"));
+            QuerySpec querySpec = new QuerySpec()
+                    .withKeyConditionExpression("tableNumber = :v_id and slotTimeStart <= :v_end and slotTimeEnd >= :v_start")
+                    .withValueMap(new ValueMap()
+                            .withNumber(":v_id", reservationData.getTableNumber())
+                            .withString(":v_start", reservationData.getSlotTimeStart())
+                            .withString(":v_end", reservationData.getSlotTimeEnd()));
+            ItemCollection<QueryOutcome> items = reservationsTable.query(querySpec);
+            if (items.iterator().hasNext()) {
+                throw new Exception("Reservation conflicts with an existing reservation.");
+            }
+
+            String reservationId = UUID.randomUUID().toString();
 
             Item item = new Item()
-                    .withPrimaryKey("reservationId", reservationId)
+                    .withPrimaryKey("id", reservationId)
                     .withNumber("tableNumber", reservationData.getTableNumber())
                     .withString("clientName", reservationData.getClientName())
                     .withString("phoneNumber", reservationData.getPhoneNumber())
@@ -50,7 +68,7 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
                     .withString("slotTimeStart", reservationData.getSlotTimeStart())
                     .withString("slotTimeEnd", reservationData.getSlotTimeEnd());
 
-            table.putItem(item);
+            reservationsTable.putItem(item);
 
             JSONObject responseBody = new JSONObject()
                     .put("reservationId", reservationId);
@@ -64,6 +82,5 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
 
         return response;
     }
-
 
 }

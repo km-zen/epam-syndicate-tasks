@@ -10,10 +10,11 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.Iterator;
+import java.util.*;
 
 public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
@@ -31,27 +32,30 @@ public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEv
             DynamoDB dynamoDB = new DynamoDB(dynamoDbClient);
             Table table = dynamoDB.getTable(System.getenv("tables_table"));
             ScanSpec scanSpec = new ScanSpec(); // Customize scan with filtering if needed
-            Iterator<Item> items = table.scan(scanSpec).iterator();
 
-            JSONArray jsonArray = new JSONArray();
+            Iterator<Item> items = table.scan(scanSpec).iterator();
+            List<Map<String, Object>> tables = new ArrayList<>();
+
             while (items.hasNext()) {
                 Item item = items.next();
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("id", item.getString("id"));
-                jsonObject.put("number", item.getInt("number"));
-                jsonObject.put("places", item.getInt("places"));
-                jsonObject.put("isVip", item.getBoolean("isVip"));
+                Map<String, Object> tableData = new HashMap<>();
+                tableData.put("id", item.getString("id"));
+                tableData.put("number", item.getInt("number"));
+                tableData.put("places", item.getInt("places"));
+                tableData.put("isVip", item.getBoolean("isVip"));
                 if (item.isPresent("minOrder")) {
-                    jsonObject.put("minOrder", item.getInt("minOrder"));
+                    tableData.put("minOrder", item.getInt("minOrder"));
                 }
-                jsonArray.put(jsonObject);
+                tables.add(tableData);
             }
 
-            JSONObject responseBody = new JSONObject().put("tables", jsonArray);
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonResponseBody = objectMapper.writeValueAsString(Collections.singletonMap("tables", tables));
 
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
-                    .withBody(responseBody.toString());
+                    .withHeaders(Collections.singletonMap("Content-Type", "application/json"))
+                    .withBody(jsonResponseBody);
         } catch (Exception e) {
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(400)

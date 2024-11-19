@@ -68,6 +68,7 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
                     .withString("slotTimeStart", reservationData.getSlotTimeStart())
                     .withString("slotTimeEnd", reservationData.getSlotTimeEnd());
 
+            log.info("Reservation item created: " + item.toString());
             reservationsTable.putItem(item);
 
             JSONObject responseBody = new JSONObject()

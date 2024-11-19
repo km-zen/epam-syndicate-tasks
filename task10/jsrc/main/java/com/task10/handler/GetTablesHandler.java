@@ -27,8 +27,6 @@ public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEv
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
         try {
-
-
             DynamoDB dynamoDB = new DynamoDB(dynamoDbClient);
             Table table = dynamoDB.getTable(System.getenv("tables_table"));
             ScanSpec scanSpec = new ScanSpec(); // Customize scan with filtering if needed
@@ -38,25 +36,28 @@ public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEv
 
             while (items.hasNext()) {
                 Item item = items.next();
-                Map<String, Object> tableData = new HashMap<>();
+                Map<String, Object> tableData = new LinkedHashMap<>();
                 tableData.put("id", item.getString("id"));
-                tableData.put("number", item.getInt("number"));
-                tableData.put("places", item.getInt("places"));
+                tableData.put("number", item.getNumber("number"));
+                tableData.put("places", item.getNumber("places"));
                 tableData.put("isVip", item.getBoolean("isVip"));
                 if (item.isPresent("minOrder")) {
-                    tableData.put("minOrder", item.getInt("minOrder"));
+                    tableData.put("minOrder", item.getNumber("minOrder"));
                 }
                 tables.add(tableData);
             }
 
-            JSONObject responseBody = new JSONObject()
-                    .put("tables", tables);
+            JSONObject responseBody = new JSONObject().put("tables", tables);
             return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(200)
+                    .withHeaders(Collections.singletonMap("Content-Type", "application/json"))
                     .withBody(responseBody.toString());
         } catch (Exception e) {
+            JSONObject errorBody = new JSONObject().put("error", "Failed to process request: " + e.getMessage());
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(400)
-                    .withBody(new JSONObject().put("error", "Failed to process request: " + e.getMessage()).toString());
+                    .withHeaders(Collections.singletonMap("Content-Type", "application/json"))
+                    .withBody(errorBody.toString());
         }
     }
 

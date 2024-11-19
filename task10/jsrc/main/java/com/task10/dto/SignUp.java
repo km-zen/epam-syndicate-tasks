@@ -2,7 +2,7 @@ package com.task10.dto;
 
 import org.json.JSONObject;
 
-public record SignUp(String firstName, String lastName, String email, String password) {
+public record SignUp(String email, String password, String firstName, String lastName) {
 
     public SignUp {
         if (email == null || password == null || firstName == null || lastName == null) {

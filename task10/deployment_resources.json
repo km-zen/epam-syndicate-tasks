@@ -46,11 +46,11 @@
   "${booking_userpool}": {
     "resource_type": "cognito_idp",
     "password_policy": {
-      "minimum_length": 12,
-      "require_uppercase": true,
-      "require_symbols": true,
-      "require_lowercase": true,
-      "require_numbers": true
+      "minimum_length": 8,
+      "require_uppercase": false,
+      "require_symbols": false,
+      "require_lowercase": false,
+      "require_numbers": false
     },
     "auto_verified_attributes": [],
     "sms_configuration": {},
@@ -72,20 +72,12 @@
     "resource_type": "api_gateway",
     "deploy_stage": "api",
     "dependencies": [],
-    "authorizers": {
-      "authorizer": {
-        "type": "COGNITO_USER_POOLS",
-        "identity_source": "method.request.header.Authorization",
-        "user_pools": [
-          "${booking_userpool}"
-        ],
-        "ttl": 300
-      }
-    },
+    "authorizers": {},
     "resources": {
       "/signup": {
         "enable_cors": false,
         "POST": {
+          "enable_proxy": true,
           "authorization_type": "NONE",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
@@ -100,6 +92,7 @@
       "/signin": {
         "enable_cors": false,
         "POST": {
+          "enable_proxy": true,
           "authorization_type": "NONE",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
@@ -114,6 +107,7 @@
       "/tables": {
         "enable_cors": false,
         "POST": {
+          "enable_proxy": true,
           "authorization_type": "NONE",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
@@ -139,6 +133,7 @@
       "/reservations": {
         "enable_cors": false,
         "POST": {
+          "enable_proxy": true,
           "authorization_type": "NONE",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
@@ -150,6 +145,22 @@
           "default_error_pattern": true
         },
         "GET": {
+          "enable_proxy": true,
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "lambda_name": "api_handler",
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true
+        }
+      },
+      "/tables/{tableId}": {
+        "enable_cors": false,
+        "GET": {
+          "enable_proxy": true,
           "authorization_type": "NONE",
           "integration_type": "lambda",
           "lambda_name": "api_handler",

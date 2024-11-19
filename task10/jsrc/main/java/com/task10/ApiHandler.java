@@ -7,22 +7,21 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.syndicate.deployment.annotations.environment.EnvironmentVariable;
 import com.syndicate.deployment.annotations.environment.EnvironmentVariables;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
-import com.syndicate.deployment.annotations.lambda.LambdaUrlConfig;
 import com.syndicate.deployment.annotations.resources.DependsOn;
 import com.syndicate.deployment.model.DeploymentRuntime;
 import com.syndicate.deployment.model.ResourceType;
 import com.syndicate.deployment.model.RetentionSetting;
-import com.syndicate.deployment.model.lambda.url.AuthType;
 import com.task10.dto.RouteKey;
 import com.task10.handler.GetRootHandler;
 import com.task10.handler.PostSignInHandler;
 import com.task10.handler.PostSignUpHandler;
 import com.task10.handler.RouteNotImplementedHandler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.syndicate.deployment.model.environment.ValueTransformer.USER_POOL_NAME_TO_CLIENT_ID;
@@ -41,15 +40,13 @@ import static com.syndicate.deployment.model.environment.ValueTransformer.USER_P
 		@EnvironmentVariable(key = "COGNITO_ID", value = "${booking_userpool}", valueTransformer = USER_POOL_NAME_TO_USER_POOL_ID),
 		@EnvironmentVariable(key = "CLIENT_ID", value = "${booking_userpool}", valueTransformer = USER_POOL_NAME_TO_CLIENT_ID)
 })
-@LambdaUrlConfig(
-		authType = AuthType.NONE
-)
 public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
 	private final CognitoIdentityProviderClient cognitoClient;
 	private final Map<RouteKey, RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent>> handlersByRouteKey;
 	private final Map<String, String> headersForCORS;
 	private final RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> routeNotImplementedHandler;
+	private static final Log log = LogFactory.getLog(ApiHandler.class);
 
 	public ApiHandler() {
 		this.cognitoClient = initCognitoClient();
@@ -60,9 +57,16 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 
 	@Override
 	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
-		return getHandler(requestEvent)
-				.handleRequest(requestEvent, context)
-				.withHeaders(headersForCORS);
+//		return getHandler(requestEvent)
+//				.handleRequest(requestEvent, context);
+		log.info("Received request: " + requestEvent.getBody());
+		if ("POST".equals(requestEvent.getHttpMethod()) && "/signup".equals(requestEvent.getPath())) {
+			log.info("Signing up request: " + requestEvent);
+		return new PostSignUpHandler(cognitoClient).handleRequest(requestEvent, context);
+		} else {
+			log.info("Wrong request: " + requestEvent);
+			return new RouteNotImplementedHandler().handleRequest(requestEvent, context);
+		}
 	}
 
 	private RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> getHandler(APIGatewayProxyRequestEvent requestEvent) {

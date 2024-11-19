@@ -37,9 +37,10 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
 
             DynamoDB dynamoDB = new DynamoDB(dynamoDbClient);
             Table table = dynamoDB.getTable(System.getenv("tables_table"));
+            log.info("Table withdrown in PostReservationMethod: " + table.toString());
 
             // Sprawdzamy czy stół istnieje
-            Item tableItem = table.getItem("id", String.valueOf(reservationData.getTableNumber()));
+            Item tableItem = table.getItem("id", reservationData.getTableNumber());
             if (tableItem == null) {
                 log.info("Table item does not exist: " + reservationData.getTableNumber());
                 throw new Exception("Table does not exist");

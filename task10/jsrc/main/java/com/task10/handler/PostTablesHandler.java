@@ -50,7 +50,7 @@ public class PostTablesHandler implements RequestHandler<APIGatewayProxyRequestE
             table.putItem(item);
 
             JSONObject responseBody = new JSONObject();
-            responseBody.put("id", id);
+            responseBody.put("id", Integer.parseInt(id));
 
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)

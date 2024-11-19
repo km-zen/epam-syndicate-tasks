@@ -26,14 +26,8 @@ public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEv
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
         try {
-            String authorizationHeader = requestEvent.getHeaders().get("Authorization");
-            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-                throw new RuntimeException("Missing or invalid Authorization header.");
-            }
 
-            String accessToken = authorizationHeader.substring("Bearer ".length());
 
-            // Optionally validate the token here with Cognito
             DynamoDB dynamoDB = new DynamoDB(dynamoDbClient);
             Table table = dynamoDB.getTable(System.getenv("tables_table"));
             ScanSpec scanSpec = new ScanSpec(); // Customize scan with filtering if needed

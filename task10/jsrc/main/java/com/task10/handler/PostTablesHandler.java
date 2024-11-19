@@ -9,11 +9,15 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.task10.ApiHandler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
 public class PostTablesHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     private final AmazonDynamoDB dynamoDbClient;
+    private static final Log log = LogFactory.getLog(ApiHandler.class);
 
     public PostTablesHandler(AmazonDynamoDB dynamoDbClient) {
         this.dynamoDbClient = dynamoDbClient;
@@ -22,13 +26,9 @@ public class PostTablesHandler implements RequestHandler<APIGatewayProxyRequestE
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
         try {
-            String authorizationHeader = requestEvent.getHeaders().get("Authorization");
-            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-                throw new IllegalArgumentException("Missing or invalid Authorization header.");
-            }
+            log.info("Received request: " + requestEvent.toString());
 
-            String accessToken = authorizationHeader.substring("Bearer ".length());
-            // Optionally validate the token with Cognito
+
 
             JSONObject requestBody = new JSONObject(requestEvent.getBody());
             int id = requestBody.getInt("id");

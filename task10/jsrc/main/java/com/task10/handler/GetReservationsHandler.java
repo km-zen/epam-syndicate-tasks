@@ -27,13 +27,7 @@ public class GetReservationsHandler implements RequestHandler<APIGatewayProxyReq
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
 
         try {
-            String authorizationHeader = requestEvent.getHeaders().get("Authorization");
-            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-                throw new IllegalArgumentException("Missing or invalid Authorization header.");
-            }
 
-            String accessToken = authorizationHeader.substring("Bearer ".length());
-            // Optionally validate the token with Cognito
 
             DynamoDB dynamoDB = new DynamoDB(dynamoDbClient);
             Table table = dynamoDB.getTable(System.getenv("reservations_table"));

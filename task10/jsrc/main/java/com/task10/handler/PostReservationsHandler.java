@@ -27,13 +27,7 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
 
         try {
-            String authorizationHeader = requestEvent.getHeaders().get("Authorization");
-            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-                throw new IllegalArgumentException("Missing or invalid Authorization header.");
-            }
 
-            String accessToken = authorizationHeader.substring("Bearer ".length());
-            // Optionally validate the token with Cognito
 
             ObjectMapper mapper = new ObjectMapper();
             ReservationData reservationData = mapper.readValue(requestEvent.getBody(), ReservationData.class);

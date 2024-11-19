@@ -82,6 +82,9 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 	private RouteKey getRouteKey(APIGatewayProxyRequestEvent requestEvent) {
 		String path = requestEvent.getPath();
 		log.info("path: " + path);
+		if(path == null){
+			return new RouteKey("GET","/tables");
+		}
 		if(path.matches("/tables/\\d+")){
 			return new RouteKey(requestEvent.getHttpMethod(),"/tables/{tableId}");
 		}

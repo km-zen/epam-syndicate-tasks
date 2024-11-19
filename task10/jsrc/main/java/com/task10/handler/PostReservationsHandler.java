@@ -11,11 +11,15 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.task10.dto.ReservationData;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
 import java.util.UUID;
 
 public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+
+    private static final Log log = LogFactory.getLog(PostReservationsHandler.class);
     private final AmazonDynamoDB dynamoDbClient;
 
     public PostReservationsHandler(AmazonDynamoDB dynamoDbClient) {
@@ -30,6 +34,7 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
 
 
             ObjectMapper mapper = new ObjectMapper();
+            log.info("Post reservations request received: " + requestEvent.getBody());
             ReservationData reservationData = mapper.readValue(requestEvent.getBody(), ReservationData.class);
 
             String reservationId = UUID.randomUUID().toString();

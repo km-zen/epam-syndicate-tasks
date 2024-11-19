@@ -9,10 +9,14 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.task10.ApiHandler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
 public class GetTableByIdHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
+    private static final Log log = LogFactory.getLog(GetTableByIdHandler.class);
     private final AmazonDynamoDB dynamoDbClient;
 
     public GetTableByIdHandler(AmazonDynamoDB dynamoDbClient) {
@@ -26,10 +30,11 @@ public class GetTableByIdHandler implements RequestHandler<APIGatewayProxyReques
         try {
 
             String tableId = requestEvent.getPathParameters().get("tableId");
+            log.info("Getting table ID: " + tableId);
             DynamoDB dynamoDB = new DynamoDB(dynamoDbClient);
             Table table = dynamoDB.getTable(System.getenv("tables_table"));
 
-            Item item = table.getItem("id", Integer.parseInt(tableId));
+            Item item = table.getItem("id", tableId);
             if (item == null) {
                 throw new Exception("Table not found for ID: " + tableId);
             }

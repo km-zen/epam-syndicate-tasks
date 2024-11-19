@@ -1,5 +1,8 @@
 package com.task10;
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
@@ -12,10 +15,7 @@ import com.syndicate.deployment.model.DeploymentRuntime;
 import com.syndicate.deployment.model.ResourceType;
 import com.syndicate.deployment.model.RetentionSetting;
 import com.task10.dto.RouteKey;
-import com.task10.handler.GetRootHandler;
-import com.task10.handler.PostSignInHandler;
-import com.task10.handler.PostSignUpHandler;
-import com.task10.handler.RouteNotImplementedHandler;
+import com.task10.handler.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
@@ -47,6 +47,10 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 	private final Map<String, String> headersForCORS;
 	private final RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> routeNotImplementedHandler;
 	private static final Log log = LogFactory.getLog(ApiHandler.class);
+	private final AmazonDynamoDB dynamoDbClient = AmazonDynamoDBClientBuilder.standard()
+			.withRegion(System.getenv("region"))
+			.build();
+
 
 	public ApiHandler() {
 		this.cognitoClient = initCognitoClient();
@@ -74,6 +78,11 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 	}
 
 	private RouteKey getRouteKey(APIGatewayProxyRequestEvent requestEvent) {
+		String path = requestEvent.getPath();
+		log.info("path: " + path);
+		if(path.matches("/tables/\\d+")){
+			return new RouteKey(requestEvent.getHttpMethod(),"/tables/{tableId}");
+		}
 		return new RouteKey(requestEvent.getHttpMethod(), requestEvent.getPath());
 	}
 
@@ -88,7 +97,12 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 		return Map.of(
 				new RouteKey("GET", "/"), new GetRootHandler(),
 				new RouteKey("POST", "/signup"), new PostSignUpHandler(cognitoClient),
-				new RouteKey("POST", "/signin"), new PostSignInHandler(cognitoClient)
+				new RouteKey("POST", "/signin"), new PostSignInHandler(cognitoClient),
+				new RouteKey("POST","/tables"), new PostTablesHandler(dynamoDbClient),
+				new RouteKey("GET","/tables"), new GetTablesHandler(dynamoDbClient),
+				new RouteKey("GET", "/tables/{tableId}"), new GetTableByIdHandler(dynamoDbClient),
+				new RouteKey("POST", "/reservations"), new PostReservationsHandler(dynamoDbClient),
+				new RouteKey("GET", "/reservations"), new GetReservationsHandler(dynamoDbClient)
 		);
 	}
 
@@ -104,6 +118,7 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 				"Accept-Version", "*"
 		);
 	}
+
 
 
 }

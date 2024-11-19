@@ -31,7 +31,7 @@ public class PostTablesHandler implements RequestHandler<APIGatewayProxyRequestE
 
 
             JSONObject requestBody = new JSONObject(requestEvent.getBody());
-            int id = requestBody.getInt("id");
+            String id = String.valueOf(requestBody.getInt("id"));
             int number = requestBody.getInt("number");
             int places = requestBody.getInt("places");
             boolean isVip = requestBody.getBoolean("isVip");

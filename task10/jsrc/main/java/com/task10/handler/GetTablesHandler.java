@@ -37,7 +37,7 @@ public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEv
             while (items.hasNext()) {
                 Item item = items.next();
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("id", item.getInt("id"));
+                jsonObject.put("id", item.getString("id"));
                 jsonObject.put("number", item.getInt("number"));
                 jsonObject.put("places", item.getInt("places"));
                 jsonObject.put("isVip", item.getBoolean("isVip"));

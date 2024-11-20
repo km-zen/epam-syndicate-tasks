@@ -37,7 +37,11 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
 
             DynamoDB dynamoDB = new DynamoDB(dynamoDbClient);
             Table table = dynamoDB.getTable(System.getenv("tables_table"));
+            int id = reservationData.getTableNumber();
+            checkIfTableExist(id, table);
+
             log.info("Table withdrown in PostReservationMethod: " + table.toString());
+
 
 
             Table reservationsTable = dynamoDB.getTable(System.getenv("reservations_table"));

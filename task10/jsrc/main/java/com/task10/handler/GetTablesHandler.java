@@ -38,25 +38,25 @@ public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEv
             Iterator<Item> items = table.scan(scanSpec).iterator();
             List<JSONObject> tables = new ArrayList<>();
 
-
             while (items.hasNext()) {
                 Item item = items.next();
-                JSONObject itemObject = new JSONObject()
-                        .put("id", item.getInt("id"))
-                        .put("number", item.getInt("number"))
-                        .put("places", item.getInt("places"))
-                        .put("isVip", item.getBoolean("isVip"));
+                Map<String, Object> orderedMap = new LinkedHashMap<>();
+                orderedMap.put("id", item.getInt("id"));
+                orderedMap.put("number", item.getInt("number"));
+                orderedMap.put("places", item.getInt("places"));
+                orderedMap.put("isVip", item.getBoolean("isVip"));
 
                 if (item.isPresent("minOrder")) {
-                    itemObject.put("minOrder", item.getInt("minOrder"));
+                    orderedMap.put("minOrder", item.getInt("minOrder"));
                 }
+                JSONObject itemObject = new JSONObject(orderedMap);
                 tables.add(itemObject);
             }
             log.info("GetTablesHandler response: " + tables);
+
             JSONObject responseBody = new JSONObject().put("tables", tables);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
-                    .withHeaders(Collections.singletonMap("Content-Type", "application/json"))
                     .withBody(responseBody.toString());
         } catch (Exception e) {
             JSONObject errorBody = new JSONObject().put("error", "Failed to process request: " + e.getMessage());

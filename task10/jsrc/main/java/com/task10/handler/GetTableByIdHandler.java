@@ -49,8 +49,10 @@ public class GetTableByIdHandler implements RequestHandler<APIGatewayProxyReques
             if (item.isPresent("minOrder")) {
                 responseBody.put("minOrder", item.getInt("minOrder"));
             }
+            log.info("Response from GetTableByIdHandler: " + responseBody.toString());
 
-            response.withStatusCode(200).withBody(responseBody.toString());
+            response.withStatusCode(200)
+                    .withBody(responseBody.toString());
         } catch (NumberFormatException e) {
             response.withStatusCode(400)
                     .withBody(new JSONObject().put("error", "Invalid table ID format").toString());

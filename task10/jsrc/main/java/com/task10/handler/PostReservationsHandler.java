@@ -39,26 +39,10 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
             Table table = dynamoDB.getTable(System.getenv("tables_table"));
             log.info("Table withdrown in PostReservationMethod: " + table.toString());
 
-            // Sprawdzamy czy stół istnieje
-            Item tableItem = table.getItem("id", reservationData.getTableNumber());
-            if (tableItem == null) {
-                log.info("Table item does not exist: " + reservationData.getTableNumber());
-                throw new Exception("Table does not exist");
-            }
 
-            // Sprawdzamy kolidujące rezerwacje
             Table reservationsTable = dynamoDB.getTable(System.getenv("reservations_table"));
-            QuerySpec querySpec = new QuerySpec()
-                    .withKeyConditionExpression("tableNumber = :v_id and slotTimeStart <= :v_end and slotTimeEnd >= :v_start")
-                    .withValueMap(new ValueMap()
-                            .withNumber(":v_id", reservationData.getTableNumber())
-                            .withString(":v_start", reservationData.getSlotTimeStart())
-                            .withString(":v_end", reservationData.getSlotTimeEnd()));
-            ItemCollection<QueryOutcome> items = reservationsTable.query(querySpec);
-            if (items.iterator().hasNext()) {
-                log.info("Table item already exists: " + reservationData.getTableNumber());
-                throw new Exception("Reservation conflicts with an existing reservation.");
-            }
+
+
 
             String reservationId = UUID.randomUUID().toString();
 
@@ -74,6 +58,7 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
             log.info("Reservation item created: " + item.toString());
             reservationsTable.putItem(item);
 
+            log.info("Reservations Table after adding item: " + reservationsTable.toString());
             JSONObject responseBody = new JSONObject()
                     .put("reservationId", reservationId);
 
@@ -85,6 +70,30 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
         }
 
         return response;
+    }
+
+    private void checkIfTableIsFree(DynamoDB dynamoDB, ReservationData reservationData, Table reservationsTable) throws Exception {
+        QuerySpec querySpec = new QuerySpec()
+                .withKeyConditionExpression("tableNumber = :v_id and slotTimeStart <= :v_end and slotTimeEnd >= :v_start")
+                .withValueMap(new ValueMap()
+                        .withNumber(":v_id", reservationData.getTableNumber())
+                        .withString(":v_start", reservationData.getSlotTimeStart())
+                        .withString(":v_end", reservationData.getSlotTimeEnd()));
+        ItemCollection<QueryOutcome> items = reservationsTable.query(querySpec);
+        if (items.iterator().hasNext()) {
+            log.info("Table item already exists: " + reservationData.getTableNumber());
+            throw new Exception("Reservation conflicts with an existing reservation.");
+        }
+
+    }
+
+    private void checkIfTableExist(int tableNumber, Table table) throws Exception {
+        // Sprawdzamy czy stół istnieje
+        Item tableItem = table.getItem("id",tableNumber);
+        if (tableItem == null) {
+            log.info("Table item does not exist: " + tableNumber);
+            throw new Exception("Table does not exist");
+        }
     }
 
 }

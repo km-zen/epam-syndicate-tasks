@@ -63,9 +63,10 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 
 	@Override
 	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
+		log.info("Received request: " + requestEvent);
 		return getHandler(requestEvent)
 				.handleRequest(requestEvent, context);
-//		log.info("Received request: " + requestEvent);
+
 //		if ("POST".equals(requestEvent.getHttpMethod()) && "/signup".equals(requestEvent.getPath())) {
 //			log.info("Signing up request: " + requestEvent);
 //		return new PostSignUpHandler(cognitoClient).handleRequest(requestEvent, context);

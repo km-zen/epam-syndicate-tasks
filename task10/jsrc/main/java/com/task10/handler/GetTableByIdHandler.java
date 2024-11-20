@@ -34,6 +34,7 @@ public class GetTableByIdHandler implements RequestHandler<APIGatewayProxyReques
             DynamoDB dynamoDB = new DynamoDB(dynamoDbClient);
             Table table = dynamoDB.getTable(System.getenv("tables_table"));
 
+            log.info("table in get table by id: " + table.toString());
             Item item = table.getItem("id", tableId);
             if (item == null) {
                 throw new Exception("Table not found for ID: " + tableId);

@@ -11,6 +11,8 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -18,6 +20,7 @@ import java.util.*;
 
 public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
+    private static final Log log = LogFactory.getLog(GetTablesHandler.class);
     private final AmazonDynamoDB dynamoDbClient;
 
     public GetTablesHandler(AmazonDynamoDB dynamoDbClient) {
@@ -29,10 +32,11 @@ public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEv
         try {
             DynamoDB dynamoDB = new DynamoDB(dynamoDbClient);
             Table table = dynamoDB.getTable(System.getenv("tables_table"));
+            log.info("Getting tables in GetTablesHandler: " + table.toString());
             ScanSpec scanSpec = new ScanSpec(); // Customize scan with filtering if needed
 
             Iterator<Item> items = table.scan(scanSpec).iterator();
-            List<Map<String, Object>> tables = new ArrayList<>();
+            List<Map<String,Object>> tables = new ArrayList<>();
 
             while (items.hasNext()) {
                 Item item = items.next();
@@ -46,7 +50,7 @@ public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEv
                 }
                 tables.add(tableData);
             }
-
+            log.info("GetTablesHandler response: " + tables);
             JSONObject responseBody = new JSONObject().put("tables", tables);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)

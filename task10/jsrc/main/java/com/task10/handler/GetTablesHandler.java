@@ -36,19 +36,21 @@ public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEv
             ScanSpec scanSpec = new ScanSpec(); // Customize scan with filtering if needed
 
             Iterator<Item> items = table.scan(scanSpec).iterator();
-            List<Map<String,Object>> tables = new ArrayList<>();
+            List<JSONObject> tables = new ArrayList<>();
+
 
             while (items.hasNext()) {
                 Item item = items.next();
-                Map<String, Object> tableData = new LinkedHashMap<>();
-                tableData.put("id", item.getString("id"));
-                tableData.put("number", item.getNumber("number"));
-                tableData.put("places", item.getNumber("places"));
-                tableData.put("isVip", item.getBoolean("isVip"));
+                JSONObject itemObject = new JSONObject()
+                        .put("id", item.getInt("id"))
+                        .put("number", item.getInt("number"))
+                        .put("places", item.getInt("places"))
+                        .put("isVip", item.getBoolean("isVip"));
+
                 if (item.isPresent("minOrder")) {
-                    tableData.put("minOrder", item.getNumber("minOrder"));
+                    itemObject.put("minOrder", item.getInt("minOrder"));
                 }
-                tables.add(tableData);
+                tables.add(itemObject);
             }
             log.info("GetTablesHandler response: " + tables);
             JSONObject responseBody = new JSONObject().put("tables", tables);

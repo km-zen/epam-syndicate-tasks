@@ -1,11 +1,16 @@
 package com.task10.handler;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsyncClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.ScanRequest;
+import com.amazonaws.services.dynamodbv2.model.ScanResult;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
@@ -20,51 +25,33 @@ import java.util.*;
 
 public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-    private static final Log log = LogFactory.getLog(GetTablesHandler.class);
-    private final AmazonDynamoDB dynamoDbClient;
-
-    public GetTablesHandler(AmazonDynamoDB dynamoDbClient) {
-        this.dynamoDbClient = dynamoDbClient;
-    }
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
-        try {
-            DynamoDB dynamoDB = new DynamoDB(dynamoDbClient);
-            Table table = dynamoDB.getTable(System.getenv("tables_table"));
-            log.info("Getting tables in GetTablesHandler: " + table.toString());
-            ScanSpec scanSpec = new ScanSpec(); // Customize scan with filtering if needed
 
-            Iterator<Item> items = table.scan(scanSpec).iterator();
-            List<JSONObject> tables = new ArrayList<>();
+        String tablesTableName = System.getenv("tables_table");
+        String region = System.getenv("REGION");
+        AmazonDynamoDBAsync dynamoDBClient = AmazonDynamoDBAsyncClientBuilder.standard().withRegion(region).build();
 
-            while (items.hasNext()) {
-                Item item = items.next();
-                Map<String, Object> orderedMap = new LinkedHashMap<>();
-                orderedMap.put("id", item.getInt("id"));
-                orderedMap.put("number", item.getInt("number"));
-                orderedMap.put("places", item.getInt("places"));
-                orderedMap.put("isVip", item.getBoolean("isVip"));
+        ScanRequest scanRequest = new ScanRequest()
+                .withTableName(tablesTableName);
 
-                if (item.isPresent("minOrder")) {
-                    orderedMap.put("minOrder", item.getInt("minOrder"));
-                }
-                JSONObject itemObject = new JSONObject(orderedMap);
-                tables.add(itemObject);
-            }
-            log.info("GetTablesHandler response: " + tables);
+        ScanResult result = dynamoDBClient.scan(scanRequest);
 
-            JSONObject responseBody = new JSONObject().put("tables", tables);
-            return new APIGatewayProxyResponseEvent()
-                    .withStatusCode(200)
-                    .withBody(responseBody.toString());
-        } catch (Exception e) {
-            JSONObject errorBody = new JSONObject().put("error", "Failed to process request: " + e.getMessage());
-            return new APIGatewayProxyResponseEvent()
-                    .withStatusCode(400)
-                    .withHeaders(Collections.singletonMap("Content-Type", "application/json"))
-                    .withBody(errorBody.toString());
+        ArrayList<Object> tempList = new ArrayList<Object>();
+        for (Map<String, AttributeValue> item : result.getItems()) {
+            Map<String, Object> simpleMap = new HashMap<String, Object>();
+            simpleMap.put("id", Integer.valueOf(item.get("id").getN()));
+            simpleMap.put("number", Integer.valueOf(item.get("number").getN()));
+            simpleMap.put("places", Integer.valueOf(item.get("places").getN()));
+            simpleMap.put("isVip", item.get("isVip").getBOOL());
+            simpleMap.put("minOrder", Integer.valueOf(item.get("minOrder").getN()));
+            tempList.add(new JSONObject(simpleMap));
         }
+
+        return new APIGatewayProxyResponseEvent()
+                .withStatusCode(200)
+                .withBody(new JSONObject().put("tables", tempList).toString());
     }
 
 }

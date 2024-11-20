@@ -105,9 +105,9 @@ public class ApiHandler implements RequestHandler<APIGatewayProxyRequestEvent, A
 				new RouteKey("POST", "/signup"), new PostSignUpHandler(cognitoClient),
 				new RouteKey("POST", "/signin"), new PostSignInHandler(cognitoClient),
 				new RouteKey("POST","/tables"), new PostTablesHandler(dynamoDbClient),
-				new RouteKey("GET","/tables"), new GetTablesHandler(dynamoDbClient),
+				new RouteKey("GET","/tables"), new GetTablesHandler(),
 				new RouteKey("GET", "/tables/{tableId}"), new GetTableByIdHandler(dynamoDbClient),
-				new RouteKey("POST", "/reservations"), new PostReservationsHandler(dynamoDbClient),
+				new RouteKey("POST", "/reservations"), new PostReservationsHandler(),
 				new RouteKey("GET", "/reservations"), new GetReservationsHandler(dynamoDbClient)
 		);
 	}

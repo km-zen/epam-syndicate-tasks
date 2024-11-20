@@ -41,7 +41,7 @@ public class GetTablesHandler implements RequestHandler<APIGatewayProxyRequestEv
         ArrayList<Object> tempList = new ArrayList<Object>();
         for (Map<String, AttributeValue> item : result.getItems()) {
             Map<String, Object> simpleMap = new HashMap<String, Object>();
-            simpleMap.put("id", Integer.valueOf(item.get("id").getN()));
+            simpleMap.put("id", Integer.valueOf(item.get("id").getS()));
             simpleMap.put("number", Integer.valueOf(item.get("number").getN()));
             simpleMap.put("places", Integer.valueOf(item.get("places").getN()));
             simpleMap.put("isVip", item.get("isVip").getBOOL());

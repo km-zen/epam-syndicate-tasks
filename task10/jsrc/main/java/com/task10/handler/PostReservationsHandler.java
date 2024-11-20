@@ -27,7 +27,7 @@ import java.util.UUID;
 
 public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-
+    private static final Log log = LogFactory.getLog(PostReservationsHandler.class);
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
 
@@ -57,7 +57,7 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
         List<Map<String, AttributeValue>> existingReservations = new ArrayList<Map<String, AttributeValue>>();
         for (Map<String, AttributeValue> item : reservationsResult.getItems()) {
             if(item.get("tableNumber").getN().equalsIgnoreCase(reservationsData.get("tableNumber").toString())
-                    && item.get("date").getN().equalsIgnoreCase(reservationsData.get("date").toString())){
+                    && item.get("date").getS().equalsIgnoreCase(reservationsData.get("date").toString())){
                 existingReservations.add(item);
             }
         }
@@ -69,6 +69,9 @@ public class PostReservationsHandler implements RequestHandler<APIGatewayProxyRe
             int existing_time_end = Integer.parseInt(existingReservation.get("slotTimeEnd").getS().substring(0,2));
             if (slot_time_start < existing_time_end && slot_time_end > existing_time_start){
                 isOverlaps = true;
+                log.info("slot_time_start: "+slot_time_start+" slot_time_end: "+slot_time_end);
+                log.info("existing_time_start: "+existing_time_start+" existing_time_end: "+existing_time_end);
+                log.info(isOverlaps);
             }
         }
 

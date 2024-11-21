@@ -120,6 +120,7 @@
           "default_error_pattern": true
         },
         "GET": {
+          "enable_proxy": true,
           "authorization_type": "NONE",
           "integration_type": "lambda",
           "lambda_name": "api_handler",

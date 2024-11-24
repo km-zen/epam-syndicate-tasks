@@ -364,9 +364,8 @@
     },
     "/signin": {
       "post": {
-        "tags": ["Authentication"],
         "summary": "Sign in a user and return an access token",
-        "operationId": "signIn",
+        "description": "This method authenticates a user and returns an access token for accessing protected routes.",
         "requestBody": {
           "required": true,
           "content": {
@@ -382,7 +381,7 @@
                   "password": {
                     "type": "string",
                     "pattern": "^[a-zA-Z0-9$%^*]{12,}$",
-                    "description": "User password, which must be alphanumeric including any of the ['$%^*'] characters and be at least 12 characters long."
+                    "description": "User password, must be alphanumeric including special characters and at least 12 characters long."
                   }
                 },
                 "required": ["email", "password"]
@@ -638,12 +637,10 @@
     },
     "/signup": {
       "post": {
-        "tags": ["Authentication"],
         "summary": "Register a new user",
-        "operationId": "signUp",
+        "description": "This method registers a new user into the system using their personal details.",
         "requestBody": {
           "required": true,
-          "description": "Data needed to register a new user",
           "content": {
             "application/json": {
               "schema": {
@@ -651,21 +648,21 @@
                 "properties": {
                   "firstName": {
                     "type": "string",
-                    "description": "User's first name."
+                    "description": "User's first name"
                   },
                   "lastName": {
                     "type": "string",
-                    "description": "User's last name."
+                    "description": "User's last name"
                   },
                   "email": {
                     "type": "string",
                     "format": "email",
-                    "description": "User's email address which must be valid."
+                    "description": "User's email address, must be valid."
                   },
                   "password": {
                     "type": "string",
                     "pattern": "^[a-zA-Z0-9$%^*-_]{12,}$",
-                    "description": "User password, which must be alphanumeric including any of the specified characters ['$%^*-_'] and be at least 12 characters long."
+                    "description": "User password, must be alphanumeric and include special characters, min 12 chars."
                   }
                 },
                 "required": ["firstName", "lastName", "email", "password"]

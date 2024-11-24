@@ -17,9 +17,8 @@
   "paths": {
     "/reservations": {
       "get": {
-        "tags": ["Reservations"],
-        "summary": "Retrieve a list of reservations",
-        "operationId": "getReservations",
+        "summary": "Retrieve all reservations",
+        "description": "Fetches a list of all current reservations in the system. Each reservation includes details such as the table number, client name, phone number, date, and the reserved time slot. This endpoint requires authorization to ensure data privacy and security.",
         "responses": {
           "200": {
             "description": "The request has succeeded. The server has provided a list of reservations as specified in the response body.",
@@ -70,9 +69,8 @@
         }
       },
       "post": {
-        "tags": ["Reservations"],
-        "summary": "Create a new reservation",
-        "operationId": "createReservation",
+        "summary": "Create a table reservation",
+        "description": "Creates a new reservation for a specified table, requiring details such as table number, client name, phone number, date, and time slot. This method checks for table availability and any conflicting reservations before processing. If successful, a unique reservation identifier is returned. Authorization is required to access this endpoint.",
         "requestBody": {
           "required": true,
           "content": {
@@ -183,9 +181,8 @@
     },
     "/tables": {
       "get": {
-        "tags": ["Tables"],
         "summary": "Retrieve all tables",
-        "operationId": "getTables",
+        "description": "Fetches and displays a list of all table entries from the database. This method is used to get an overview of all the data entities stored in table format.",
         "responses": {
           "200": {
             "description": "The request has succeeded. The server has processed the request and has returned a list of tables as specified in the response body. Each table includes details such as its ID, number, capacity, whether it's in the VIP hall, and optionally, the minimum order required to book it.",
@@ -245,9 +242,8 @@
         }
       },
       "post": {
-        "tags": ["Tables"],
         "summary": "Create a new table",
-        "operationId": "createTable",
+        "description": "Creates a new table entry in the system with specific attributes such as table number, seating capacity, VIP status, and minimum order requirement if applicable. The method requires authorization and the response returns the unique identifier of the newly created table.",
         "requestBody": {
           "required": true,
           "content": {
@@ -490,9 +486,8 @@
     },
     "/tables/{tableId}": {
       "get": {
-        "tags": ["Tables"],
-        "summary": "Retrieve information about a specific table",
-        "operationId": "getTableById",
+        "summary": "Retrieve table details",
+        "description": "Fetches detailed information for a specific table identified by the tableId parameter. This method returns attributes such as the table number, number of places, VIP status, and if applicable, the minimum order requirement for that table. Authorization is required to access this information.",
         "parameters": [
           {
             "name": "tableId",
